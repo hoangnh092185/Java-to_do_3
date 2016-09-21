@@ -4,20 +4,8 @@ import static org.junit.Assert.*;
 
 public class TaskTest {
 
-  @Before
-  public void setUp() {
-    DB.sql2o = new Sql2o("jdbc:postgresql://localhost:5432/to_do_list_test", null, null);
-  }
-
-  @After
-    public void tearDown() {
-      try(Connection con = DB.sql2o.open()) {
-        String deleteTasksQuery = "DELETE FROM tasks *;";
-        String deleteCategoriesQuery = "DELETE FROM categories *;";
-        con.createQuery(deleteTasksQuery).executeUpdate();
-        con.createQuery(deleteCategoriesQuery).executeUpdate();
-      }
-    }
+  @Rule
+ public DatabaseRule database = new DatabaseRule();
 
   @Test
   public void equals_returnsTrueIfDescriptionsAretheSame() {
@@ -73,58 +61,12 @@ public class TaskTest {
     Task savedTask = Task.find(myTask.getId());
     assertEquals(savedTask.getCategoryId(), myCategory.getId());
   }
+  @Test
+  public void delete_deletesTask_true() {
+    Task myTask = new Task("Mow the lawn", 1);
+    myTask.save();
+    int myTaskId = myTask.getId();
+    myTask.delete();
+    assertEquals(null, Task.find(myTaskId));
+  }
 }
-
-  //<----Old Test---->
-  // @Test
-  // public void Task_instantiatesCorrectly_true() {
-  //   Task myTask = new Task("Mow the lawn", 1, 1);
-  //   assertEquals(true, myTask instanceof Task);
-  // }
-  //
-  // @Test
-  // public void Task_instantiatesWithDescription_String() {
-  //   Task myTask = new Task("Mow the lawn", 1);
-  //   assertEquals("Mow the lawn", 1, myTask.getDescription());
-  // }
-  //
-  // @Test
-  // public void isCompleted_isFalseAfterInstatiation_false() {
-  //   Task myTask = new Task("mow the lawn", 1);
-  //   assertEquals(false, myTask.isCompleted());
-  // }
-  //
-  // @Test
-  // public void getCreatedAt_instantiatesWithCurrentTime_today() {
-  //   Task myTask = new Task("mow the lawn", 1);
-  //   assertEquals(LocalDateTime.now().getDayOfWeek(), myTask.getCreatedAt().getDayOfWeek());
-  // }
-  //
-  // @Test
-  // public void all_returnsAllInstancesOfTask_true() {
-  //   Task firstTask = new Task("mow the lawn", 1);
-  //   Task secondTask = new Task("buy groceries", 1);
-  //   assertEquals(true, Task.all().contains(firstTask));
-  //   assertEquals(true, Task.all().contains(secondTask));
-  // }
-  //
-  // @Test
-  // public void clear_emptiesAllTasksFromArrayList_0() {
-  //   Task myTask = new Task("Mow the lawn", 1);
-  //   Task.clear();
-  //   assertEquals(Task.all().size(), 0);
-  // }
-  //
-  // @Test
-  // public void getId_tasksInstantiateWithAnID_1() {
-  //   Task.clear();
-  //   Task task = new Task("mow the lawn", 1);
-  //   assertEquals(1, task.getId());
-  // }
-  //
-  // @Test
-  // public void find_returnsTaskWithSameId_secondTask() {
-  //   Task firstTask = new Task("mow the lawn", 1);
-  //   Task secondTask = new Task("buy groceries", 1);
-  //   assertEquals(Task.find(secondTask.getId()), secondTask);
-  // }
